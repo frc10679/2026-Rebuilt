@@ -35,7 +35,7 @@ public final class Constants {
     public static final double LAUNCHING_FEEDER_VOLTAGE = 9;
     public static final double LAUNCHING_LAUNCHER_VOLTAGE = 10.6;
     public static final double SPIN_UP_FEEDER_VOLTAGE = -6;
-    public static final double SPIN_UP_SECONDS = 1;
+    public static final double SPIN_UP_SECONDS = 0.2;
 
     public static final double INTAKING_FEEDER_SPEED = 0.8;
     public static final double LAUNCHING_FEEDER_SPEED = -0.8;
