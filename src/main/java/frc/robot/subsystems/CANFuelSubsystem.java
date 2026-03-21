@@ -48,8 +48,7 @@ public class CANFuelSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Intaking intake roller value", INTAKING_INTAKE_SPEED);
     SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_SPEED);
     SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_SPEED);
-    // SmartDashboard.putNumber("Spin-up feeder roller value",
-    // SPIN_UP_FEEDER_VOLTAGE);
+    SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_SPEED);
   }
 
   // A method to set the voltage of the intake roller
