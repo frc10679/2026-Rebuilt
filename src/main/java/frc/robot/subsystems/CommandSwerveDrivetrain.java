@@ -7,10 +7,11 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -21,7 +22,6 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import java.util.Optional;
@@ -41,8 +41,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
 
-  private SwerveDrivePoseEstimator localizedPoseEstimator;
-
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
@@ -54,6 +52,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
   private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
   private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
+  /* PathPlanner request to apply robot-relative speeds */
+  private final SwerveRequest.ApplyRobotSpeeds m_pathPlannerRequest = new SwerveRequest.ApplyRobotSpeeds();
 
   /*
    * SysId routine for characterizing translation. This is used to find PID gains
@@ -131,11 +132,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
 
-    localizedPoseEstimator = new SwerveDrivePoseEstimator(getKinematics(), getState().Pose.getRotation(),
-        getState().ModulePositions, new Pose2d(),
-        VecBuilder.fill(1, 1, 3),
-        VecBuilder.fill(1, 1, 3));
+    try {
+      // Load config and configure AutoBuilder in one safe block
+      RobotConfig config = RobotConfig.fromGUISettings();
 
+      AutoBuilder.configure(
+          this::getPose,
+          this::resetPose,
+          () -> this.getState().Speeds,
+          (speeds, feedforwards) -> driveRobotRelative(speeds),
+          new PPHolonomicDriveController(
+              new PIDConstants(5.0, 0.0, 0.0),
+              new PIDConstants(5.0, 0.0, 0.0)),
+          config,
+          () -> {
+            var alliance = DriverStation.getAlliance();
+            return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
+          },
+          this);
+    } catch (Exception e) {
+      // This will catch missing config.json files or GUI export errors
+      DriverStation.reportError("PathPlanner config error: " + e.getMessage(), e.getStackTrace());
+    }
   }
 
   /**
@@ -336,5 +354,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   @Override
   public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
     return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+  }
+
+  /** Returns the current pose of the robot. */
+  public Pose2d getPose() {
+    return this.getState().Pose;
+  }
+
+  /** Resets the odometry to the specified pose. */
+  public void resetPose(Pose2d pose) {
+    super.resetPose(pose);
+  }
+
+  /** Drives the robot using robot-relative robot speeds. */
+  public void driveRobotRelative(edu.wpi.first.math.kinematics.ChassisSpeeds speeds) {
+    this.setControl(m_pathPlannerRequest.withSpeeds(speeds));
   }
 }
