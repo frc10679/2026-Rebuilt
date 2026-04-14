@@ -36,7 +36,7 @@ public final class Constants {
     public static final double INTAKING_FEEDER_SPEED = 0.8;
     public static final double LAUNCHING_FEEDER_SPEED = -0.75;
     public static final double INTAKING_INTAKE_SPEED = -0.4;
-    public static final double LAUNCHING_LAUNCHER_SPEED = -0.65;
+    public static final double LAUNCHING_LAUNCHER_SPEED = -0.70;
     public static final double SPIN_UP_FEEDER_SPEED = -0.8;
   }
 

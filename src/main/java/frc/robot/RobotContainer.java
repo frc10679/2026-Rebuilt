@@ -29,10 +29,11 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
   private double MaxSpeed =
-      0.5 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+      0.8 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
+  // top
   // speed
   private double MaxAngularRate =
-      RotationsPerSecond.of(1.5) // Default is 0.75
+      RotationsPerSecond.of(0.75) // Default is 0.75
           .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
@@ -85,11 +86,17 @@ public class RobotContainer {
         drivetrain.applyRequest(
             () ->
                 drive
-                    .withVelocityX(
-                        driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y
+                    .withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive
+                    // forward
+                    // with
+                    // negative
+                    // Y
                     // (forward)
-                    .withVelocityY(
-                        driverController.getLeftX() * MaxSpeed) // Drive left with negative X
+                    .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive
+                    // left
+                    // with
+                    // negative
+                    // X
                     // (left)
                     .withRotationalRate(driverController.getRightX() * -MaxAngularRate) // Drive
             // counterclockwise
