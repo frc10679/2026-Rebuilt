@@ -29,9 +29,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
   private double MaxSpeed =
-      0.8 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
-  // top
-  // speed
+      0.8 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate =
       RotationsPerSecond.of(0.75) // Default is 0.75
           .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -86,25 +84,17 @@ public class RobotContainer {
         drivetrain.applyRequest(
             () ->
                 drive
-                    .withVelocityX(driverController.getLeftY() * MaxSpeed) // Drive
-                    // forward
-                    // with
-                    // negative
-                    // Y
-                    // (forward)
-                    .withVelocityY(driverController.getLeftX() * MaxSpeed) // Drive
-                    // left
-                    // with
-                    // negative
-                    // X
-                    // (left)
-                    .withRotationalRate(driverController.getRightX() * -MaxAngularRate) // Drive
-            // counterclockwise
-            // with negative X
-            // (left)
+                    .withVelocityX(
+                        driverController.getLeftY()
+                            * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(
+                        driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(
+                        driverController.getRightX()
+                            * -MaxAngularRate) // Drive counterclockwise with negative X (left)
             ));
 
-    // Idle while the robot is disabled. This ensures the configured
+    // Idle while the robot is disabled. This ensures the configureds
     // neutral mode is applied to the drive motors while disabled.
     final var idle = new SwerveRequest.Idle();
     RobotModeTriggers.disabled()
